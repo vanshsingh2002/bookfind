@@ -1,0 +1,16 @@
+[
+  {
+    "name": "HELL",
+    "email": "a@gmail.com",
+    "password": "123",
+    "mobile": "123",
+    "role": "Owner"
+  },
+  {
+    "name": "ramu",
+    "email": "q@gmail.com",
+    "password": "123",
+    "mobile": "123456789",
+    "role": "Owner"
+  }
+]
