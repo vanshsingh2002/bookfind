@@ -108,11 +108,7 @@ export default function AddBookPage() {
   if (isLoading) {
     return (
       <SidebarProvider>
-        <AppSidebar  user={{
-          name: user.name,
-          email: user.email,
-          role: user.role === "Owner" || user.role === "Seeker" ? user.role : "Seeker",
-        }} />
+      <AppSidebar user={user} />
         <SidebarInset>
           <header className="sticky top-0 z-10 flex justify-between items-center gap-4 px-4 py-2 border-b bg-background dark:border-neutral-800">
             <Skeleton className="h-6 w-6 rounded-full" />

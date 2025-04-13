@@ -1,16 +1,18 @@
 // app/api/books/[id]/route.ts
-
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import Book from "@/app/models/book";
 
-export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+interface Context {
+  params: {
+    id: string;
+  };
+}
+
+export async function DELETE(req: Request, context: Context) {
   try {
     await connectDB();
-    const deletedBook = await Book.findByIdAndDelete(params.id);
+    const deletedBook = await Book.findByIdAndDelete(context.params.id);
 
     if (!deletedBook) {
       return NextResponse.json({ error: "Book not found" }, { status: 404 });
@@ -23,16 +25,13 @@ export async function DELETE(
   }
 }
 
-export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(req: Request, context: Context) {
   try {
     await connectDB();
     const body = await req.json();
 
     const updatedBook = await Book.findByIdAndUpdate(
-      params.id,
+      context.params.id,
       { ...body },
       { new: true }
     );
