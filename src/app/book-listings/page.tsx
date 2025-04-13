@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/sidebar";
 import { toast } from "sonner";
 import ListingCard from "@/components/ListingCard";
+import { Skeleton } from "@/components/ui/skeleton"; // Import skeleton component
 
 interface Book {
   id: string;
@@ -30,6 +31,7 @@ interface Book {
 export default function BookListingsPage() {
   const [books, setBooks] = useState<Book[]>([]);
   const [user, setUser] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true); // Add loading state
   const { items } = useCart();
 
   const router = useRouter();
@@ -42,13 +44,20 @@ export default function BookListingsPage() {
   }, []);
 
   const fetchBooks = async () => {
-    const res = await fetch("/api/books");
-    const data = await res.json();
-    const formatted = data.map((book: any) => ({
-      ...book,
-      id: book._id,
-    }));
-    setBooks(formatted);
+    try {
+      setIsLoading(true);
+      const res = await fetch("/api/books");
+      const data = await res.json();
+      const formatted = data.map((book: any) => ({
+        ...book,
+        id: book._id,
+      }));
+      setBooks(formatted);
+    } catch (error) {
+      toast.error("Failed to fetch books");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -81,8 +90,17 @@ export default function BookListingsPage() {
     }
   };
 
-  
-console.log(books);
+  // Skeleton loader component
+  const BookSkeleton = () => (
+    <div className="space-y-3">
+      <Skeleton className="h-[200px] w-full rounded-lg" />
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-[250px]" />
+        <Skeleton className="h-4 w-[200px]" />
+      </div>
+    </div>
+  );
+
   return (
     <SidebarProvider>
       <AppSidebar user={user} />
@@ -99,15 +117,26 @@ console.log(books);
           </a>
         </header>
         <div className="grid gap-6 p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {books.map((book) => (
-            <div key={book.id} className="relative">
-              <ListingCard
-                book={book}
-                onDelete={handleDelete}
-                onUpdate={handleEdit}
-              />
+          {isLoading ? (
+            // Show skeleton loaders while loading
+            Array.from({ length: 8 }).map((_, index) => (
+              <BookSkeleton key={index} />
+            ))
+          ) : books.length > 0 ? (
+            books.map((book) => (
+              <div key={book.id} className="relative">
+                <ListingCard
+                  book={book}
+                  onDelete={handleDelete}
+                  onUpdate={handleEdit}
+                />
+              </div>
+            ))
+          ) : (
+            <div className="col-span-full text-center py-10">
+              <p className="text-muted-foreground">No books available</p>
             </div>
-          ))}
+          )}
         </div>
       </SidebarInset>
     </SidebarProvider>

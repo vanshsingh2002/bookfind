@@ -126,18 +126,6 @@ export default function ListingCard({
             {book.price === 0 ? "Free" : `₹${book.price}`}
           </span>
         )}
-        <div>
-          <span className="font-medium text-foreground">Status:</span>{" "}
-          <span
-            className={`inline-block px-2 py-0.5 rounded-md ${
-              book.isRented
-                ? "bg-destructive text-white"
-                : "bg-green-100 text-green-800"
-            }`}
-          >
-            {book.isRented ? "Not Available" : "Available"}
-          </span>
-        </div>
       </CardContent>
 
       <CardFooter className="mt-auto flex items-center justify-between pt-4 gap-2">
@@ -211,16 +199,6 @@ export default function ListingCard({
                   )}
                 </div>
               )}
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="isAvailable"
-                  checked={!form.isRented}
-                  onCheckedChange={(checked) =>
-                    setForm({ ...form, isRented: !checked })
-                  }
-                />
-                <Label htmlFor="isAvailable">Available</Label>
-              </div>
 
               <DialogFooter>
                 <Button type="submit" className="w-full cursor-pointer mt-2">

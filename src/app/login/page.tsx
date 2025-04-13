@@ -1,32 +1,36 @@
+// app/login/page.tsx
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { useAuth } from '@/components/auth-context';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const router = useRouter();
+  const { login } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const res = await fetch('/api/users/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const res = await fetch('/api/users/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      setError(data.error);
-    } else {
-      localStorage.setItem('user', JSON.stringify(data.user));
-      router.push('/dashboard');
+      if (!res.ok) {
+        setError(data.error);
+      } else {
+        login(data.user);
+      }
+    } catch (err) {
+      setError('An error occurred during login');
     }
   };
 

@@ -10,16 +10,18 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton component
 
 export default function AddBookPage() {
   const [user, setUser] = useState<any>(null);
   const [mode, setMode] = useState("Exchange");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Loading state for user check
   const router = useRouter();
   const { items } = useCart();
 
@@ -37,8 +39,12 @@ export default function AddBookPage() {
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
-    if (!userData) return router.push("/login");
+    if (!userData) {
+      router.push("/login");
+      return;
+    }
     setUser(JSON.parse(userData));
+    setIsLoading(false);
   }, []);
 
   const validateForm = () => {
@@ -66,6 +72,7 @@ export default function AddBookPage() {
     e.preventDefault();
     if (!validateForm()) return;
 
+    setIsSubmitting(true);
     const payload = {
       ...form,
       price: mode === "Rent" ? Number(form.price) : 0,
@@ -73,26 +80,69 @@ export default function AddBookPage() {
       userId: user._id,
     };
 
-    const res = await fetch("/api/books", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    try {
+      const res = await fetch("/api/books", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-    if (res.ok) {
-      toast("Book added successfully.");
-      router.push("/dashboard");
-    } else {
-      toast.error("Failed to add book.");
+      if (res.ok) {
+        toast("Book added successfully.");
+        router.push("/dashboard");
+      } else {
+        toast.error("Failed to add book.");
+      }
+    } catch (error) {
+      toast.error("An error occurred while adding the book.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
-
-  if (!user) return null;
 
   const handleChange = (key: string, value: string) => {
     setForm({ ...form, [key]: value });
     setErrors({ ...errors, [key]: undefined });
   };
+
+  if (isLoading) {
+    return (
+      <SidebarProvider>
+        <AppSidebar  user={{
+          name: user.name,
+          email: user.email,
+          role: user.role === "Owner" || user.role === "Seeker" ? user.role : "Seeker",
+        }} />
+        <SidebarInset>
+          <header className="sticky top-0 z-10 flex justify-between items-center gap-4 px-4 py-2 border-b bg-background dark:border-neutral-800">
+            <Skeleton className="h-6 w-6 rounded-full" />
+            <div className="relative">
+              <Skeleton className="h-6 w-6 rounded-full" />
+            </div>
+          </header>
+
+          <div className="p-6 w-full md:w-1/2 mx-auto">
+            <Card className="rounded-2xl shadow-md border">
+              <CardHeader>
+                <Skeleton className="h-8 w-[200px]" />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="grid w-full items-center gap-1.5">
+                    <Skeleton className="h-4 w-[80px]" />
+                    <Skeleton className="h-10 w-full" />
+                  </div>
+                ))}
+                <Skeleton className="h-10 w-full mt-4" />
+              </CardContent>
+            </Card>
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
+    );
+  }
+
+  if (!user) return null;
 
   return (
     <SidebarProvider>
@@ -157,8 +207,20 @@ export default function AddBookPage() {
                   </div>
                 )}
 
-                <Button type="submit" className="w-full cursor-pointer mt-4">
-                  Add Book
+                <Button 
+                  type="submit" 
+                  className="w-full cursor-pointer mt-4"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Adding...
+                    </>
+                  ) : "Add Book"}
                 </Button>
               </form>
             </CardContent>

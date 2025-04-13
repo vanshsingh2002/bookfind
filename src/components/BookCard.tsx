@@ -31,8 +31,7 @@ interface Book {
   genre: string;
   location: string;
   author: string;
-  isRented: boolean;
-  listingType: string;
+  mode: string;
   email?: string;
   phone?: string;
 }
@@ -59,19 +58,6 @@ export default function BookCard({ book }: { book: Book }) {
 
   return (
     <Card className="flex flex-col overflow-hidden shadow-md transition hover:shadow-xl rounded-2xl relative">
-      {/* Status Badge */}
-      <div className="absolute top-2 left-2 z-2">
-        <span
-          className={`text-xs font-semibold px-2 py-1 rounded-full ${
-            book.isRented
-              ? "bg-red-100 text-red-600"
-              : "bg-green-100 text-green-600"
-          }`}
-        >
-          {book.isRented ? "Rented/Exchanged" : "Available"}
-        </span>
-      </div>
-
       {/* Header */}
       <CardHeader className="pb-2">
         <CardTitle className="text-xl font-semibold">{book.title}</CardTitle>
@@ -95,10 +81,10 @@ export default function BookCard({ book }: { book: Book }) {
           </span>
         </div>
         <div>
-          <span className="font-medium text-foreground">Owner:</span>{" "}
+          <span className="font-medium text-foreground">Owner Info:</span>{" "}
           {book.email || book.phone || "Not Provided"}
         </div>
-        {book.listingType === "rent" && (
+        {book.mode === "rent" || book.mode === "Rent" && (
           <span className="text-lg font-semibold text-primary">
             {book.price === 0 ? "Free" : `₹${book.price}`}
           </span>
@@ -107,25 +93,23 @@ export default function BookCard({ book }: { book: Book }) {
 
       {/* Footer */}
       <CardFooter className="mt-auto flex items-center justify-between pt-4 gap-2">
-        {(book.listingType === "rent" || book.listingType === "both") && (
+        {(book.mode === "rent" || book.mode === "Rent") && (
           <Button
             size="sm"
             className="rounded-full px-4 cursor-pointer"
-            disabled={book.isRented}
             onClick={handleRent}
           >
             Rent Now
           </Button>
         )}
 
-        {(book.listingType === "exchange" || book.listingType === "both") && (
+        {(book.mode === "exchange" || book.mode === "Exchange") && (
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button
                 size="sm"
                 className="rounded-full px-4 cursor-pointer"
                 variant="outline"
-                disabled={book.isRented}
               >
                 Request Exchange
               </Button>

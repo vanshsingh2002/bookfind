@@ -8,7 +8,6 @@ const BookSchema = new mongoose.Schema(
     email: String,
     phone: String,
     location: String,
-    isRented: { type: Boolean, default: false },
     mode: { type: String, enum: ["Rent", "Exchange"] },
     price: Number,
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },

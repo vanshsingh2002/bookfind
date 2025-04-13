@@ -1,16 +1,14 @@
 import {
   BookOpen,
-  Bot,
-  SquareTerminal,
   Plus,
   ShoppingCartIcon,
   LogOut,
+  Home,
 } from "lucide-react";
 import { NavMain } from "@/components/nav-main";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
@@ -18,7 +16,6 @@ import {
 interface User {
   name: string;
   email: string;
-  avatar: string;
   role: "Owner" | "Seeker";
 }
 
@@ -29,15 +26,10 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 export function AppSidebar({ user, ...props }: AppSidebarProps) {
   const navItems = [
     {
-      title: "Playground",
-      url: "#",
-      icon: SquareTerminal,
+      title: "Home",
+      url: "/dashboard",
+      icon: Home,
       isActive: true,
-    },
-    {
-      title: "Models",
-      url: "#",
-      icon: Bot,
     },
     {
       title: "Logout",
