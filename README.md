@@ -47,8 +47,8 @@ A web application for renting and exchanging books between users. The platform a
 ### Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/book-rental-app.git
-   cd book-rental-app
+   git clone https://github.com/vanshsingh2002/bookfind
+   cd bookfind
 2. Install dependencies:
     ```bash
    npm install
