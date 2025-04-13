@@ -10,17 +10,8 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import BookCard from "@/components/BookCard";
+import ListingCard from "@/components/ListingCard";
 
 interface Book {
   id: string;
@@ -39,14 +30,6 @@ interface Book {
 export default function BookListingsPage() {
   const [books, setBooks] = useState<Book[]>([]);
   const [user, setUser] = useState<any>(null);
-  const [editBook, setEditBook] = useState<Book | null>(null);
-  const [editForm, setEditForm] = useState({
-    title: "",
-    author: "",
-    genre: "",
-    location: "",
-    price: 0,
-  });
   const { items } = useCart();
 
   const router = useRouter();
@@ -61,7 +44,11 @@ export default function BookListingsPage() {
   const fetchBooks = async () => {
     const res = await fetch("/api/books");
     const data = await res.json();
-    setBooks(data);
+    const formatted = data.map((book: any) => ({
+      ...book,
+      id: book._id,
+    }));
+    setBooks(formatted);
   };
 
   const handleDelete = async (id: string) => {
@@ -77,34 +64,25 @@ export default function BookListingsPage() {
     }
   };
 
-  const handleEdit = (book: Book) => {
-    setEditBook(book);
-    setEditForm({
-      title: book.title,
-      author: book.author,
-      genre: book.genre,
-      location: book.location,
-      price: book.price,
-    });
-  };
-
-  const submitEdit = async () => {
-    if (!editBook) return;
-    const res = await fetch(`/api/books/${editBook.id}`, {
+  const handleEdit = async (updatedBook: Book) => {
+    const res = await fetch(`/api/books/${updatedBook.id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...editForm }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedBook),
     });
-
+  
     if (res.ok) {
       toast.success("Book updated");
       fetchBooks();
-      setEditBook(null);
     } else {
-      toast.error("Failed to update");
+      toast.error("Failed to update book");
     }
   };
 
+  
+console.log(books);
   return (
     <SidebarProvider>
       <AppSidebar user={user} />
@@ -120,84 +98,14 @@ export default function BookListingsPage() {
             )}
           </a>
         </header>
-        <div className="max-w-5xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid gap-6 p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {books.map((book) => (
             <div key={book.id} className="relative">
-              <BookCard book={book} />
-
-              {user?.email === book.email && (
-                <div className="absolute top-2 right-2 flex gap-2">
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleEdit(book)}
-                      >
-                        Edit
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-md">
-                      <DialogHeader>
-                        <DialogTitle>Edit Book</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-3 py-2">
-                        <Input
-                          value={editForm.title}
-                          onChange={(e) =>
-                            setEditForm({ ...editForm, title: e.target.value })
-                          }
-                          placeholder="Title"
-                        />
-                        <Input
-                          value={editForm.author}
-                          onChange={(e) =>
-                            setEditForm({ ...editForm, author: e.target.value })
-                          }
-                          placeholder="Author"
-                        />
-                        <Input
-                          value={editForm.genre}
-                          onChange={(e) =>
-                            setEditForm({ ...editForm, genre: e.target.value })
-                          }
-                          placeholder="Genre"
-                        />
-                        <Input
-                          value={editForm.location}
-                          onChange={(e) =>
-                            setEditForm({
-                              ...editForm,
-                              location: e.target.value,
-                            })
-                          }
-                          placeholder="Location"
-                        />
-                        <Input
-                          value={editForm.price}
-                          onChange={(e) =>
-                            setEditForm({
-                              ...editForm,
-                              price: Number(e.target.value),
-                            })
-                          }
-                          placeholder="Price"
-                          type="number"
-                        />
-                      </div>
-                      <Button onClick={submitEdit}>Update</Button>
-                    </DialogContent>
-                  </Dialog>
-
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => handleDelete(book.id)}
-                  >
-                    Delete
-                  </Button>
-                </div>
-              )}
+              <ListingCard
+                book={book}
+                onDelete={handleDelete}
+                onUpdate={handleEdit}
+              />
             </div>
           ))}
         </div>
